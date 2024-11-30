@@ -16,5 +16,4 @@ steps:
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      az group create --name "aks-resource-group" --location "East US"
-      az aks create --resource-group "aks-resource-group" --name "aks-cluster" --node-count 2 --enable-managed-identity --generate-ssh-keys
+      az aks create --resource-group "basicAksRg" --name "aks-cluster" --node-count 2 --enable-managed-identity --generate-ssh-keys
