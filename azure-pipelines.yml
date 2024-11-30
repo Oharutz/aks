@@ -1,0 +1,20 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  name: 'azUbuntuAgentPool'
+
+steps:
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: 'Azure ARM'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      az group create --name "aks-resource-group" --location "East US"
+      az aks create --resource-group "aks-resource-group" --name "aks-cluster" --node-count 2 --enable-managed-identity --generate-ssh-keys
