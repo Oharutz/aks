@@ -12,12 +12,13 @@ variables:
 trigger:
 - main
 
+
 pool:
   name: 'azUbuntuAgentPool'
 
 jobs:
   - job: ConditionalTrigger
-    condition: contains(variables['commitMessage'], '[Run]')
+    condition: ne(variables['commitMessage'], '[Skip]')
     steps:
     # Step 1: Initialize Terraform
     - script: |
