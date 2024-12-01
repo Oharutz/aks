@@ -2,6 +2,12 @@ provider "azurerm" {
   features {}
 }
 
+variable "aks_cluster_name" {
+  description = "The name of the AKS cluster"
+  type        = string
+  default     = "basicAKS"
+}
+
 resource "azurerm_resource_group" "aks_rg" {
   name     = "basicAksRg"
   location = "westus"
@@ -43,7 +49,6 @@ resource "azurerm_subnet" "private_endpoint_subnet" {
   resource_group_name  = azurerm_resource_group.aks_rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.2.0/24"]
-  enforce_private_link_endpoint_network_policies = true
 }
 
 # Private DNS Zone for AKS
