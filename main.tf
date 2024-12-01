@@ -14,6 +14,12 @@ resource "azurerm_virtual_network" "vnet" {
   address_space       = ["10.0.0.0/16"]
 }
 
+resource "azurerm_user_assigned_identity" "uami" {
+  name                = "aks-managed-identity"
+  location            = azurerm_resource_group.aks_rg.location
+  resource_group_name = azurerm_resource_group.aks_rg.name
+}
+
 resource "azurerm_subnet" "aks_subnet" {
   name                 = "aks-subnet"
   resource_group_name  = azurerm_resource_group.aks_rg.name
@@ -29,7 +35,7 @@ resource "azurerm_subnet" "aks_subnet" {
       ]
     }
   }
-
+}
 
 # Subnet for Private Link (Optional)
 resource "azurerm_subnet" "private_endpoint_subnet" {
@@ -54,7 +60,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "dns_link" {
   virtual_network_id    = azurerm_virtual_network.vnet.id
 }
 
-resource "azurerm_kubernetes_cluster" "aks" {
+resource "azurerm_kubernetes_cluster" "aks_private" {
   name                = var.aks_cluster_name
   location            = azurerm_resource_group.aks_rg.location
   resource_group_name = azurerm_resource_group.aks_rg.name
@@ -68,26 +74,30 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 
   identity {
-    type = "SystemAssigned"
+    type = "UserAssigned"
+    user_assigned_identity {
+      client_id     = azurerm_user_assigned_identity.uami.client_id
+    }
   }
-}
   network_profile {
     network_plugin    = "azure"
     network_policy    = "azure"
     load_balancer_sku = "standard"
     outbound_type     = "userDefinedRouting"
-    }
+  }
+
   api_server_access_profile {
     enable_private_cluster = true
   }
+
   depends_on = [
     azurerm_private_dns_zone_virtual_network_link.dns_link
   ]
 }
 output "aks_cluster_name" {
-  value = azurerm_kubernetes_cluster.aks_private.name
+    value = azurerm_kubernetes_cluster.aks_private.name
 }
 
 output "aks_private_fqdn" {
-  value = azurerm_kubernetes_cluster.aks_private.private_fqdn
+    value = azurerm_kubernetes_cluster.aks_private.private_fqdn
 }
