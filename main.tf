@@ -2,12 +2,6 @@ provider "azurerm" {
   features {}
 }
 
-variable "aks_cluster_name" {
-  description = "The name of the AKS cluster"
-  type        = string
-  default     = "basicAKS"
-}
-
 resource "azurerm_resource_group" "aks_rg" {
   name     = "basicAksRg"
   location = "westus"
