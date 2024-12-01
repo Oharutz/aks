@@ -21,9 +21,14 @@ jobs:
     condition: ne(variables['commitMessage'], '[Skip]')
     steps:
     # Step 1: Install Terraform
-    - task: TerraformInstaller@1
-      inputs:
-        terraformVersion: 'latest'
+    - script: |
+        apt-get update && apt-get install -y unzip
+        curl -O https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip
+        unzip terraform_1.5.0_linux_amd64.zip
+        mv terraform /usr/local/bin/
+        terraform version
+      displayName: Install Terraform & Unzip
+      
     # Step 2: Initialize Terraform
     - script: |
         terraform init \
