@@ -88,11 +88,7 @@ resource "azurerm_kubernetes_cluster" "aks_private" {
     load_balancer_sku = "standard"
     outbound_type     = "userDefinedRouting"
   }
-
-  api_server_access_profile {
-    private_cluster_enabled = true
-  }
-
+  
   depends_on = [
     azurerm_private_dns_zone_virtual_network_link.dns_link
   ]
