@@ -3,17 +3,45 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
+variables:
+  commitMessage: $(Build.SourceVersionMessage)
+  TF_VAR_location: 'West US'
+  TF_VAR_resource_group_name: 'basicAksRg'
+  TF_VAR_aks_cluster_name: 'basicAksCluster'
+
 trigger:
 - main
 
 pool:
   name: 'azUbuntuAgentPool'
 
-steps:
-- task: AzureCLI@2
-  inputs:
-    azureSubscription: 'Azure ARM'
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      az aks create --resource-group "basicAksRg" --name "aks-cluster" --node-count 2 --enable-managed-identity --generate-ssh-keys
+jobs:
+  - job: ConditionalTrigger
+    condition: contains(variables['commitMessage'], '[Run]')
+    steps:
+    # Step 1: Initialize Terraform
+    - script: |
+        terraform init \
+          -backend-config="storage_account_name=tfstateaccount1296" \
+          -backend-config="container_name=tfstate" \
+          -backend-config="key=terraform.tfstate" \
+          -backend-config="access_key=$(terraformBackendKey)"
+      displayName: 'Terraform Init'
+
+    # Step 2: Validate Terraform
+    - script: terraform validate
+      displayName: 'Terraform Validate'
+
+    # Step 3: Plan Terraform
+    - script: terraform plan -out=tfplan
+      displayName: 'Terraform Plan'
+
+    # Step 4: Apply Terraform
+    - script: terraform apply -auto-approve tfplan
+      displayName: 'Terraform Apply'
+
+    # Step 5: Output kubeconfig (optional)
+    - script: |
+        echo "Kubeconfig:"
+        terraform output kube_config
+      displayName: 'Output Kubeconfig'
