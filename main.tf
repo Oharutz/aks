@@ -79,8 +79,8 @@ resource "azurerm_kubernetes_cluster" "aks_private" {
   }
 
   identity {
-    tenant_id = azurerm_user_assigned_identity.uami.client_id
-    principal_id = azurerm_user_assigned_identity.uami.principal_id
+    type      = UserAssigned
+    identity_ids = [azurerm_user_assigned_identity.uami.principal_id]
   }
   network_profile {
     network_plugin    = "azure"
