@@ -20,7 +20,11 @@ jobs:
   - job: ConditionalTrigger
     condition: ne(variables['commitMessage'], '[Skip]')
     steps:
-    # Step 1: Initialize Terraform
+    # Step 1: Install Terraform
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: 'latest'
+    # Step 2: Initialize Terraform
     - script: |
         terraform init \
           -backend-config="storage_account_name=tfstateaccount1296" \
