@@ -52,14 +52,19 @@ jobs:
         commandOptions: '-out=tfplan'
         environmentServiceNameAzureRM: 'Azure ARM'
 
+    # Temporary: Check files in current directory
+    - script: ls -la
+      displayName: Show Current Files
+      
     # Step 4: Apply Terraform
     - task: TerraformTaskV4@4
       displayName: 'Terraform Apply'
       inputs:
         provider: 'azurerm'
         command: 'apply'
-        commandOptions: '--var-file=$(Build.SourcesDirectory)/variables.tf -auto-approve'
+        commandOptions: '-auto-approve'
         environmentServiceNameAzureRM: 'Azure ARM'
+        
 
     # Step 5: Output kubeconfig (optional)
     - script: |
