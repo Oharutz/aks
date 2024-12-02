@@ -45,6 +45,7 @@ jobs:
 
     # Step 3: Plan Terraform
     - task: TerraformTaskV4@4
+      displayName: 'Terraform Plan'
       inputs:
         provider: 'azurerm'
         command: 'plan'
@@ -53,6 +54,7 @@ jobs:
 
     # Step 4: Apply Terraform
     - task: TerraformTaskV4@4
+      displayName: 'Terraform Apply'
       inputs:
         provider: 'azurerm'
         command: 'apply'
