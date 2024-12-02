@@ -37,7 +37,7 @@ resource "azurerm_subnet" "aks_subnet" {
   }
 }
 
-# Subnet for Private Link (Optional)
+# Subnet for Private Link
 resource "azurerm_subnet" "private_endpoint_subnet" {
   name                 = "private-endpoint-subnet"
   resource_group_name  = azurerm_resource_group.aks_rg.name
@@ -80,7 +80,7 @@ resource "azurerm_kubernetes_cluster" "aks_private" {
     network_plugin    = "azure"
     network_policy    = "azure"
     load_balancer_sku = "standard"
-    outbound_type     = "userDefinedRouting"
+    outbound_type     = "loadBalancer"
   }
 
   depends_on = [
