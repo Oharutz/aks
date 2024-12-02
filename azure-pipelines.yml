@@ -23,7 +23,7 @@ jobs:
         sudo mv terraform /usr/local/bin/
         terraform version
       displayName: Install Terraform & Unzip
-      
+
     # Step 2: Initialize Terraform
     - task: TerraformTaskV4@4
       displayName: 'Terraform Init'
@@ -31,7 +31,7 @@ jobs:
         provider: 'azurerm'
         command: 'init'
         backendServiceArm: 'Azure ARM'
-        backendAzureRmResourceGroupName: 'basicAksRg'
+        backendAzureRmResourceGroupName: '$(TF_VAR_resource_group_name)'
         backendAzureRmStorageAccountName: 'tfstateaccount1296'
         backendAzureRmContainerName: 'tfstate'
         backendAzureRmKey: 'tf/terraform.tfstate'
@@ -58,7 +58,7 @@ jobs:
       inputs:
         provider: 'azurerm'
         command: 'apply'
-        commandOptions: '-auto-approve'
+        commandOptions: '--var-file =variables.tf -auto-approve'
         environmentServiceNameAzureRM: 'Azure ARM'
 
     # Step 5: Output kubeconfig (optional)
