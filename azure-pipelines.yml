@@ -20,23 +20,16 @@ jobs:
   - job: ConditionalTrigger
     condition: ne(variables['commitMessage'], '[Skip]')
     steps:
-    # Step 1: Install Terraform
-    - script: |
-        sudo apt-get update && sudo apt-get install -y unzip
-        curl -O https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip
-        unzip terraform_1.5.0_linux_amd64.zip
-        sudo mv terraform /usr/local/bin/
-        terraform version
-      displayName: Install Terraform & Unzip
-      
-    # Step 2: Initialize Terraform
-    - script: |
-        terraform init \
-          -backend-config="storage_account_name=tfstateaccount1296" \
-          -backend-config="container_name=tfstate" \
-          -backend-config="key=terraform.tfstate" \
-          -backend-config="access_key=$(terraformBackendKey)"
-      displayName: 'Terraform Init'
+    # Step 1: Initialize Terraform
+    - task: TerraformTaskV4@4
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        backendServiceArm: 'Azure ARM'
+        backendAzureRmResourceGroupName: 'basicAksRg'
+        backendAzureRmStorageAccountName: 'tfstateaccount1296'
+        backendAzureRmContainerName: 'tfstate'
+        backendAzureRmKey: 'tf/terraform.tfstate'
 
     # Step 2: Validate Terraform
     - script: terraform validate
