@@ -1,8 +1,8 @@
 variables:
   commitMessage: $(Build.SourceVersionMessage)
-  TF_VAR_location: 'West US'
-  TF_VAR_resource_group_name: 'basicAksRg'
-  TF_VAR_aks_cluster_name: 'basicAksCluster'
+  TF_VAR_location: $(location)
+  TF_VAR_resource_group_name: $(resourceGroupName)
+  TF_VAR_aks_cluster_name: '$(aksClusterName)-$(Build.BuildId)'
 
 trigger:
 - main
@@ -23,8 +23,10 @@ jobs:
         sudo mv terraform /usr/local/bin/
         terraform version
       displayName: Install Terraform & Unzip
+      
     # Step 2: Initialize Terraform
     - task: TerraformTaskV4@4
+      displayName: 'Terraform Init'
       inputs:
         provider: 'azurerm'
         command: 'init'
@@ -35,16 +37,32 @@ jobs:
         backendAzureRmKey: 'tf/terraform.tfstate'
 
     # Step 2: Validate Terraform
-    - script: terraform validate
+    - task: TerraformTaskV4@4
       displayName: 'Terraform Validate'
+      inputs:
+        provider: 'azurerm'
+        command: 'validate'
 
     # Step 3: Plan Terraform
-    - script: terraform plan -out=tfplan
+    - task: TerraformTaskV4@4
       displayName: 'Terraform Plan'
+      inputs:
+        provider: 'azurerm'
+        command: 'plan'
+        environmentServiceName: 'Azure ARM'
+        vars: |
+          location=$(TF_VAR_location)
+          resource_group_name=$(TF_VAR_resource_group_name)
+          aks_cluster_name=$(TF_VAR_aks_cluster_name)
 
     # Step 4: Apply Terraform
-    - script: terraform apply -auto-approve tfplan
+    - task: TerraformTaskV4@4
       displayName: 'Terraform Apply'
+      inputs:
+        provider: 'azurerm'
+        command: 'plan'
+        environmentServiceName: 'Azure ARM'
+        args: '-auto-approve'
 
     # Step 5: Output kubeconfig (optional)
     - script: |
