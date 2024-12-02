@@ -45,24 +45,19 @@ jobs:
 
     # Step 3: Plan Terraform
     - task: TerraformTaskV4@4
-      displayName: 'Terraform Plan'
       inputs:
         provider: 'azurerm'
         command: 'plan'
-        environmentServiceName: 'Azure ARM'
-        vars: |
-          location=$(TF_VAR_location)
-          resource_group_name=$(TF_VAR_resource_group_name)
-          aks_cluster_name=$(TF_VAR_aks_cluster_name)
+        commandOptions: '-out=tfplan'
+        environmentServiceNameAzureRM: 'Azure ARM'
 
     # Step 4: Apply Terraform
     - task: TerraformTaskV4@4
-      displayName: 'Terraform Apply'
       inputs:
         provider: 'azurerm'
-        command: 'plan'
-        environmentServiceName: 'Azure ARM'
-        args: '-auto-approve'
+        command: 'apply'
+        commandOptions: '-auto-approve'
+        environmentServiceNameAzureRM: 'Azure ARM'
 
     # Step 5: Output kubeconfig (optional)
     - script: |
