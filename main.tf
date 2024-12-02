@@ -3,8 +3,8 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "aks_rg" {
-  name     = "basicAksRg"
-  location = "westus"
+  name     = var.resource_group_name
+  location = var.location
 }
 
 resource "azurerm_virtual_network" "vnet" {
