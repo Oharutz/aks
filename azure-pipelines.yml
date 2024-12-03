@@ -3,10 +3,8 @@ variables:
   prefix: $(prefix)
   location: $(location)
 
-
 trigger:
 - main
-
 
 pool:
   name: 'azUbuntuAgentPool'
@@ -15,6 +13,10 @@ jobs:
   - job: ConditionalTrigger
     condition: ne(variables['commitMessage'], '[Skip]')
     steps:
+    # Pre: Print Vars
+    - script: |
+        echo "prefix=$(prefix)"
+        echo "location=$(location)"
     # Step 1: Install Terraform
     - script: |
         sudo apt-get update && sudo apt-get install -y unzip
