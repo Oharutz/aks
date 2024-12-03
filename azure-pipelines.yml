@@ -1,6 +1,8 @@
 variables:
   commitMessage: $(Build.SourceVersionMessage)
-
+  location: 'westus'
+  prefix: 'test'
+  
 trigger:
 - main
 
