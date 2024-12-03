@@ -1,8 +1,8 @@
 variables:
   commitMessage: $(Build.SourceVersionMessage)
+  TF_VAR_prefix: $(prefix)
   TF_VAR_location: $(location)
-  TF_VAR_resource_group_name: $(resourceGroupName)
-  TF_VAR_aks_cluster_name: '$(aksClusterName)-$(Build.BuildId)'
+
 
 trigger:
 - main
@@ -30,6 +30,7 @@ jobs:
       inputs:
         provider: 'azurerm'
         command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)\custom'
         backendServiceArm: 'Azure ARM'
         backendAzureRmResourceGroupName: 'basicAksRg'
         backendAzureRmStorageAccountName: 'tfstateaccount1296'
@@ -42,6 +43,7 @@ jobs:
       inputs:
         provider: 'azurerm'
         command: 'validate'
+        workingDirectory: '$(System.DefaultWorkingDirectory)\custom'
 
     # Step 3: Plan Terraform
     - task: TerraformTaskV4@4
@@ -49,6 +51,7 @@ jobs:
       inputs:
         provider: 'azurerm'
         command: 'plan'
+        workingDirectory: '$(System.DefaultWorkingDirectory)\custom'
         commandOptions: '-out=tfplan'
         environmentServiceNameAzureRM: 'Azure ARM'
 
@@ -62,12 +65,9 @@ jobs:
       inputs:
         provider: 'azurerm'
         command: 'apply'
+        workingDirectory: '$(System.DefaultWorkingDirectory)\custom'
         commandOptions: '-auto-approve'
         environmentServiceNameAzureRM: 'Azure ARM'
-        environmentVariables: |
-          TF_VAR_location=$(location)
-          TF_VAR_resource_group_name=$(resourceGroupName)
-          TF_VAR_aks_cluster_name=$(aksClusterName)
 
     # Step 5: Output kubeconfig (optional)
     - script: |
