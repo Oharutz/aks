@@ -7,7 +7,7 @@ variable "location" {
 variable "resource_group_name" {
   description = "The name of the resource group."
   type        = string
-  default     = "aksResourceGroup"
+  default     = "aksResourceGroup2"
 }
 
 variable "kubernetes_cluster_name" {
