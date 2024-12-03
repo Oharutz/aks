@@ -13,5 +13,5 @@ variable "resource_group_name" {
 variable "kubernetes_cluster_name" {
   description = "The name of the AKS cluster."
   type        = string
-  default     = "basicaks"
+  default     = "privateaks"
 }
