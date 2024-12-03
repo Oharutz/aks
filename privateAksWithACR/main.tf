@@ -124,7 +124,7 @@ resource "azurerm_private_dns_a_record" "aks_dns_record" {
   zone_name           = azurerm_private_dns_zone.aks_dns.name
   resource_group_name = azurerm_resource_group.main.name
   ttl                 = 300
-  records             = [azurerm_private_endpoint.aks_endpoint.private_ip_address]
+  records             = [azurerm_private_endpoint.aks_endpoint.private_service_connection.private_ip_address]
 }
 
 # DNS Record for ACR in Private Zone
@@ -133,5 +133,5 @@ resource "azurerm_private_dns_a_record" "acr_dns_record" {
   zone_name           = azurerm_private_dns_zone.acr_dns.name
   resource_group_name = azurerm_resource_group.main.name
   ttl                 = 300
-  records             = [azurerm_private_endpoint.acr_endpoint.private_ip_address]
+  records             = [azurerm_private_endpoint.acr_endpoint.private_service_connection.private_ip_address]
 }
