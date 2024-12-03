@@ -1,7 +1,7 @@
 variables:
   commitMessage: $(Build.SourceVersionMessage)
-  location: 'westus'
-  prefix: 'test'
+  TF_VAR_location: '$(location)'
+  TF_VAR_prefix: '$(prefix)'
   
 trigger:
 - main
@@ -55,7 +55,7 @@ jobs:
         provider: 'azurerm'
         command: 'plan'
         workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksWithACR'
-        commandOptions: '-var location=$(location) -var prefix=$(prefix) -out=tfplan'
+        commandOptions: '-out=tfplan'
         environmentServiceNameAzureRM: 'Azure ARM'
 
     # Temporary: Check files in current directory
