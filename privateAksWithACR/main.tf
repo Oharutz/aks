@@ -2,55 +2,59 @@ provider "azurerm" {
   features {}
 }
 
-resource "azurerm_resource_group" "aks_rg" {
-  name     = "${var.prefix}-k8s-resources"
+# Create a resource group
+resource "azurerm_resource_group" "main" {
+  name     = var.resource_group_name
   location = var.location
 }
 
-# ACR
-resource "azurerm_container_registry" "acr" {
-  name                = var.acr_name
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
-  sku                 = "Premium" # Premium supports private endpoints
-  admin_enabled       = true
-
-  network_rule_set {
-    default_action = "Deny"
-    virtual_network {
-      subnet_id = data.azurerm_subnet.aks_subnet.id
-    }
-  }
+# Create a Virtual Network
+resource "azurerm_virtual_network" "main" {
+  name                = "${var.resource_group_name}-vnet"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  address_space       = ["10.0.0.0/16"]
 }
 
+# Create a Subnet
+resource "azurerm_subnet" "main" {
+  name                 = "${var.resource_group_name}-subnet"
+  resource_group_name  = azurerm_resource_group.main.name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = ["10.0.1.0/24"]
+}
 
-resource "azurerm_kubernetes_cluster" "aks_rg" {
-  name                = "${var.prefix}-k8s"
-  location            = azurerm_resource_group.aks_rg.location
-  resource_group_name = azurerm_resource_group.aks_rg.name
-  dns_prefix          = "${var.prefix}-k8s"
+# Create an Azure Container Registry (ACR)
+resource "azurerm_container_registry" "main" {
+  name                = "${var.resource_group_name}acr"
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+  sku                 = "Basic"
+  admin_enabled       = true
+}
+
+# Create an AKS Cluster
+resource "azurerm_kubernetes_cluster" "main" {
+  name                = var.kubernetes_cluster_name
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  dns_prefix          = "${var.kubernetes_cluster_name}-dns"
 
   default_node_pool {
     name       = "default"
-    node_count = 2
+    node_count = 1
     vm_size    = "Standard_DS2_v2"
-  }
-
-  network_profile {
-    network_plugin    = "azure"
-    load_balancer_sku = "standard"
+    vnet_subnet_id = azurerm_subnet.main.id
   }
 
   identity {
     type = "SystemAssigned"
   }
-
-  private_cluster_enabled = true
 }
 
-# ACR Integration
+# Assign ACR Pull Role to AKS System Identity
 resource "azurerm_role_assignment" "acr_pull" {
-  scope                = azurerm_container_registry.acr.id
+  scope                = azurerm_container_registry.main.id
   role_definition_name = "AcrPull"
-  principal_id         = azurerm_kubernetes_cluster.aks.kubelet_identity[0].object_id
+  principal_id         = azurerm_kubernetes_cluster.main.identity[0].principal_id
 }
