@@ -49,14 +49,13 @@ jobs:
 
 
     # Step 3: Plan Terraform
-    - task: TerraformTaskV4@4
-      displayName: 'Terraform Plan'
-      inputs:
-        provider: 'azurerm'
-        command: 'plan'
-        workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksWithACR'
-        commandOptions: '-out=tfplan'
-        environmentServiceNameAzureRM: 'Azure ARM'
+    - script: |
+        terraform plan -out=tfplan
+      displayName: "Terraform Plan"
+      workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksWithACR'
+      env:
+        TF_VAR_location: "$(location)"
+        TF_VAR_prefix: "$(prefix)"
 
     # Temporary: Check files in current directory
     - script: ls -la
