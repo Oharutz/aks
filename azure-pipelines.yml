@@ -1,7 +1,5 @@
 variables:
   commitMessage: $(Build.SourceVersionMessage)
-  prefix: $(prefix)
-  location: $(location)
 
 trigger:
 - main
