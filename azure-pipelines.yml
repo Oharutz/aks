@@ -53,7 +53,7 @@ jobs:
         provider: 'azurerm'
         command: 'plan'
         workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksWithACR'
-        commandOptions: '-out=tfplan'
+        commandOptions: '-var location=$(TF_VAR_location) -var prefix=$(TF_VAR_prefix) -out=tfplan'
         environmentServiceNameAzureRM: 'Azure ARM'
 
     # Temporary: Check files in current directory
