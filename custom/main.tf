@@ -26,7 +26,6 @@ resource "azurerm_subnet" "aks_subnet" {
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.1.0/24"]
   private_link_service_network_policies_enabled = false
-  privateLinkServiceNetworkPolicies = 
 
   delegation {
     name = "aks-delegation"
