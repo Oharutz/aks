@@ -60,13 +60,6 @@ resource "azurerm_role_assignment" "acr_pull" {
   principal_id         = azurerm_kubernetes_cluster.main.identity[0].principal_id
 }
 
-# Assign ACR Pull Role to AKS System Identity
-resource "azurerm_role_assignment" "acr_pull" {
-  scope                = azurerm_container_registry.main.id
-  role_definition_name = "AcrPull"
-  principal_id         = azurerm_kubernetes_cluster.main.identity[0].principal_id
-}
-
 # Private DNS Zone for AKS
 resource "azurerm_private_dns_zone" "aks_dns" {
   name                = "privatelink.${var.location}.azmk8s.io"
