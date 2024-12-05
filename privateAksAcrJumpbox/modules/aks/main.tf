@@ -25,9 +25,6 @@ resource "azurerm_kubernetes_cluster" "aks" {
     network_policy    = "azure"
     load_balancer_sku = "standard"
   }
-  web_app_routing {
-    dns_zone_ids = [module.dns.aks_dns_id]
-  }
 }
 
 resource "azurerm_role_assignment" "acr_pull" {

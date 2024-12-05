@@ -32,13 +32,43 @@ resource "azurerm_private_dns_zone_virtual_network_link" "acr_vnet_link" {
   virtual_network_id    = var.aks_vnet_id
 }
 
+# Private Endpoint for AKS
+resource "azurerm_private_endpoint" "aks_endpoint" {
+  name                = "aks-private-endpoint"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  subnet_id           = azurerm_subnet.main.id
+
+  private_service_connection {
+    name                           = "aks-connection"
+    private_connection_resource_id = azurerm_kubernetes_cluster.main.id
+    subresource_names              = ["management"]
+    is_manual_connection           = false
+  }
+}
+
+# Private Endpoint for ACR
+resource "azurerm_private_endpoint" "acr_endpoint" {
+  name                = "acr-private-endpoint"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  subnet_id           = azurerm_subnet.main.id
+
+  private_service_connection {
+    name                           = "acr-connection"
+    private_connection_resource_id = azurerm_container_registry.main.id
+    subresource_names              = ["registry"]
+    is_manual_connection           = false
+  }
+}
+
 # DNS Record for AKS in Private Zone
 resource "azurerm_private_dns_a_record" "aks_dns_record" {
   name                = "aks-api"
   zone_name           = azurerm_private_dns_zone.aks_dns.name
   resource_group_name = var.resource_group_name
   ttl                 = 300
-  records             = [azurerm_private_dns_zone_virtual_network_link.aks_vnet_link.private_service_connection[0].private_ip_address]
+  records             = [azurerm_private_endpoint.aks_endpoint.private_service_connection[0].private_ip_address]
 }
 
 # DNS Record for ACR in Private Zone
@@ -47,5 +77,5 @@ resource "azurerm_private_dns_a_record" "acr_dns_record" {
   zone_name           = azurerm_private_dns_zone.acr_dns.name
   resource_group_name = var.resource_group_name
   ttl                 = 300
-  records             = [azurerm_private_dns_zone_virtual_network_link.acr_vnet_link.private_service_connection[0].private_ip_address]
+  records             = [azurerm_private_endpoint.acr_endpoint.private_service_connection[0].private_ip_address]
 }
