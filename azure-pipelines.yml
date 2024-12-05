@@ -22,14 +22,22 @@ jobs:
         echo "location=$(location)"
         echo "location=$(aks_subnet_id)"
         echo "location=$(aks_vnet_id)"
-    #Install Terraform
+    # Install Terraform and kubectl
     - script: |
-        sudo apt-get update && sudo apt-get install -y unzip
+        # Update package list and install prerequisites
+        sudo apt-get update && sudo apt-get install -y unzip curl apt-transport-https
+
+        # Install Terraform
         curl -O https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip
         unzip terraform_1.5.0_linux_amd64.zip
         sudo mv terraform /usr/local/bin/
         terraform version
-      displayName: Install Terraform & Unzip
+
+        # Install kubectl
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+        kubectl version --client
+      displayName: Install Terraform and kubectl
 
     #Initialize Terraform
     - task: TerraformTaskV4@4

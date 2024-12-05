@@ -3,7 +3,7 @@ terraform {
     resource_group_name  = "basicAksRg"
     storage_account_name = "tfstateaccount1296"
     container_name       = "tfstate"
-    key                  = "dev/terraform.tfstate"  # Use environment-specific key if needed
+    key                  = "terraform.tfstate"  # Use environment-specific key if needed
   }
 }
 
@@ -48,4 +48,5 @@ module "dns" {
   aks_id   = module.aks.aks_id
   acr_id   = module.acr.acr_id
   acr_name   = module.acr.acr_name
+  resource_group_name = azurerm_resource_group.main.name
 }

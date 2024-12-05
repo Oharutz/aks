@@ -9,4 +9,5 @@ resource "azurerm_container_registry" "main" {
   location            = var.location
   sku                 = "Premium"
   admin_enabled       = true
+  public_network_access_enabled = false
 }
