@@ -20,3 +20,7 @@ variable "resource_group_name" {
   type        = string
   default = "privateAksRg"
 }
+variable "acr_id" {
+  description = "The ID of the Azure Container Registry to which AKS should have access"
+  type        = string
+}
