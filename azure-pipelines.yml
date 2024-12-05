@@ -83,13 +83,19 @@ jobs:
         commandOptions: '-auto-approve'
         environmentServiceNameAzureRM: 'Azure ARM'
 
-    #Output kubeconfig
+    # Save kubeconfig and transfer to jumpbox
     - script: |
         echo "Copying kubeconfig to jump box"
         echo "$(terraform output -raw kube_config_raw)" > kubeconfig
-        mkdir -p ~/.kube
-        mv kubeconfig ~/.kube/config
+        scp -o StrictHostKeyChecking=no kubeconfig appusr@$(JUMPBOXIP):~/.kube/config
+        ssh -o StrictHostKeyChecking=no appusr@$(JUMPBOXIP) 'chmod 600 ~/.kube/config && mkdir -p ~/.kube'
+      displayName: "Save kubeconfig and Transfer to Jumpbox"
 
-        echo "Deploying manifests to private AKS cluster"
-        kubectl apply -f deployment.yaml
-      displayName: "Save kubeconfig"
+    # Deploy Application
+    - script: |
+        ssh -o StrictHostKeyChecking=no appusr@$(JUMPBOXIP) << EOF
+          # Apply application manifests
+          kubectl apply -f /path/to/nextjs-deployment.yml
+          kubectl apply -f /path/to/nextjs-ingress.yml
+        EOF
+      displayName: Deploy Application
