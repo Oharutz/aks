@@ -13,7 +13,7 @@ variable "resource_group_name" {
 variable "prefix" {
   type        = string
   description = "Prefix for naming resources"
-  default = "privateAks"
+  default = "privateaks"
 }
 
 variable "aks_subnet_id" {
