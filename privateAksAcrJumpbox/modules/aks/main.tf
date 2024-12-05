@@ -14,7 +14,6 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 
   private_cluster_enabled         = true
-  api_server_authorized_ip_ranges = []
 
   identity {
     type = "SystemAssigned"
