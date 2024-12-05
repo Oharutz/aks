@@ -1,3 +1,12 @@
+terraform {
+  backend "azurerm" {
+    resource_group_name  = "basicAksRg"
+    storage_account_name = "tfstateaccount1296"
+    container_name       = "tfstate"
+    key                  = "dev/terraform.tfstate"  # Use environment-specific key if needed
+  }
+}
+
 provider "azurerm" {
   features {}
 }
