@@ -2,7 +2,10 @@ variables:
   commitMessage: $(Build.SourceVersionMessage)
   TF_VAR_location: '$(location)'
   TF_VAR_prefix: '$(prefix)'
-  
+  TF_VAR_aks_subnet_id: '$(aks_subnet_id)'
+  TF_VAR_aks_vnet_id: '$(aks_vnet_id)'
+  TF_VAR_resource_group_name: '$(resource_group_name)'
+
 trigger:
 - main
 
@@ -13,11 +16,13 @@ jobs:
   - job: ConditionalTrigger
     condition: ne(variables['commitMessage'], '[Skip]')
     steps:
-    # Pre: Print Vars
+    #Print Vars
     - script: |
         echo "prefix=$(prefix)"
         echo "location=$(location)"
-    # Step 1: Install Terraform
+        echo "location=$(aks_subnet_id)"
+        echo "location=$(aks_vnet_id)"
+    #Install Terraform
     - script: |
         sudo apt-get update && sudo apt-get install -y unzip
         curl -O https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip
@@ -26,7 +31,7 @@ jobs:
         terraform version
       displayName: Install Terraform & Unzip
 
-    # Step 2: Initialize Terraform
+    #Initialize Terraform
     - task: TerraformTaskV4@4
       displayName: 'Terraform Init'
       inputs:
@@ -39,7 +44,7 @@ jobs:
         backendAzureRmContainerName: 'tfstate'
         backendAzureRmKey: 'terraform.tfstate'
 
-    # Step 2: Validate Terraform
+    #Validate Terraform
     - task: TerraformTaskV4@4
       displayName: 'Terraform Validate'
       inputs:
@@ -48,7 +53,7 @@ jobs:
         workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksAcrJumpbox'
 
 
-    # Step 3: Plan Terraform
+    #Plan Terraform
     - task: TerraformTaskV4@4
       inputs:
         provider: 'azurerm'
@@ -56,11 +61,11 @@ jobs:
         environmentServiceNameAzureRM: 'Azure ARM'
         workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksAcrJumpbox'
 
-    # Temporary: Check files in current directory
+    #Check files in current directory
     - script: ls -la
       displayName: Show Current Files
       
-    # Step 4: Apply Terraform
+    #Apply Terraform
     - task: TerraformTaskV4@4
       displayName: 'Terraform Apply'
       inputs:
@@ -70,7 +75,7 @@ jobs:
         commandOptions: '-auto-approve'
         environmentServiceNameAzureRM: 'Azure ARM'
 
-    # Step 5: Output kubeconfig (optional)
+    #Output kubeconfig
     - script: |
         echo "Copying kubeconfig to jump box"
         echo "$(terraform output -raw kube_config_raw)" > kubeconfig
