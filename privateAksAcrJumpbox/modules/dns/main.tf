@@ -35,13 +35,13 @@ resource "azurerm_private_dns_zone_virtual_network_link" "acr_vnet_link" {
 # Private Endpoint for AKS
 resource "azurerm_private_endpoint" "aks_endpoint" {
   name                = "aks-private-endpoint"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-  subnet_id           = azurerm_subnet.main.id
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  subnet_id           = var.aks_subnet_id
 
   private_service_connection {
     name                           = "aks-connection"
-    private_connection_resource_id = azurerm_kubernetes_cluster.main.id
+    private_connection_resource_id = module.aks.aks_id
     subresource_names              = ["management"]
     is_manual_connection           = false
   }
@@ -50,13 +50,13 @@ resource "azurerm_private_endpoint" "aks_endpoint" {
 # Private Endpoint for ACR
 resource "azurerm_private_endpoint" "acr_endpoint" {
   name                = "acr-private-endpoint"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-  subnet_id           = azurerm_subnet.main.id
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  subnet_id           = var.aks_subnet_id
 
   private_service_connection {
     name                           = "acr-connection"
-    private_connection_resource_id = azurerm_container_registry.main.id
+    private_connection_resource_id = module.acr.acr_id
     subresource_names              = ["registry"]
     is_manual_connection           = false
   }
