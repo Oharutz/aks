@@ -17,7 +17,6 @@ module "aks" {
   source = "./modules/aks"
   prefix = var.prefix
   location = var.location
-  aks_vnet_id = var.aks_vnet_id
   aks_subnet_id = var.aks_subnet_id
 }
 
