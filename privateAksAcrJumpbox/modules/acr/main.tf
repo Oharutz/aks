@@ -4,4 +4,6 @@ resource "azurerm_container_registry" "main" {
   location            = azurerm_resource_group.main.location
   sku                 = "Premium"
   admin_enabled       = true
+
+  depends_on = [azurerm_resource_group.main]
 }
