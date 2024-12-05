@@ -15,3 +15,8 @@ variable "aks_subnet_id" {
   description = "The SUBNET ID For the AKS Cluster"
   default     = "/subscriptions/54da8c11-3fc8-4363-ac36-2ded76e48576/resourceGroups/management/providers/Microsoft.Network/virtualNetworks/demoEnvVnet/subnets/aks"
 }
+variable "resource_group_name" {
+  description = "The name of the resource group"
+  type        = string
+  default = "privateAksRg"
+}

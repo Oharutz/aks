@@ -8,16 +8,26 @@ resource "azurerm_resource_group" "main" {
   location = var.location
 }
 
+output "resource_group_name" {
+  value = azurerm_resource_group.main.name
+}
+
+output "resource_group_location" {
+  value = azurerm_resource_group.main.location
+}
+
 module "acr" {
   source = "./modules/acr"
   prefix = var.prefix
+  resource_group_name = azurerm_resource_group.main.name
 }
 
 module "aks" {
   source = "./modules/aks"
   prefix = var.prefix
-  location = var.location
+  location = azurerm_resource_group.main.location
   aks_subnet_id = var.aks_subnet_id
+  resource_group_name = azurerm_resource_group.main.name
 }
 
 module "dns" {

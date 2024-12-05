@@ -2,7 +2,7 @@
 resource "azurerm_kubernetes_cluster" "aks" {
   name                = "${var.prefix}-aks"
   location            = var.location
-  resource_group_name = azurerm_resource_group.main.name
+  resource_group_name = var.resource_group_name
   dns_prefix          = "${var.prefix}-dns"
   http_application_routing_enabled = true
 

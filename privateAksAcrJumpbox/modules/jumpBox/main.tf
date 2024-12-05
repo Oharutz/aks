@@ -1,7 +1,7 @@
 resource "azurerm_virtual_machine" "jumpbox" {
   name                = "jumpbox-vm"
-  resource_group_name = azurerm_resource_group.main.name
-  location            = azurerm_resource_group.main.location
+  resource_group_name = var.resource_group_name
+  location            = var.resource_group_name
   network_interface_ids = [
     azurerm_network_interface.jumpbox_nic.id
   ]
@@ -30,7 +30,7 @@ resource "azurerm_virtual_machine" "jumpbox" {
 resource "azurerm_network_interface" "jumpbox_nic" {
   name                = "jumpbox-nic"
   location            = var.location
-  resource_group_name = azurerm_resource_group.main.name
+  resource_group_name = var.resource_group_name
   ip_configuration {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.main.id
