@@ -1,3 +1,9 @@
+variable "location" {
+  type        = string
+  description = "Azure region for the resources"
+  default     = "westus"
+}
+
 variable "resource_group_name" {
   type        = string
   description = "Resource Group Name"

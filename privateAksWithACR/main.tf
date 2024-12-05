@@ -73,12 +73,12 @@ resource "azurerm_private_dns_zone" "acr_dns" {
 }
 
 # Virtual Network Link for AKS DNS
-#resource "azurerm_private_dns_zone_virtual_network_link" "aks_vnet_link" {
-#  name                  = "aks-vnet-link"
-#  resource_group_name   = azurerm_resource_group.main.name
-#  private_dns_zone_name = azurerm_private_dns_zone.aks_dns.name
-#  virtual_network_id    = azurerm_virtual_network.main.id
-#}
+resource "azurerm_private_dns_zone_virtual_network_link" "aks_vnet_link" {
+  name                  = "aks-vnet-link"
+  resource_group_name   = azurerm_resource_group.main.name
+  private_dns_zone_name = azurerm_private_dns_zone.aks_dns.name
+  virtual_network_id    = azurerm_virtual_network.main.id
+}
 
 # Virtual Network Link for ACR DNS
 resource "azurerm_private_dns_zone_virtual_network_link" "acr_vnet_link" {
@@ -88,12 +88,12 @@ resource "azurerm_private_dns_zone_virtual_network_link" "acr_vnet_link" {
   virtual_network_id    = azurerm_virtual_network.main.id
 }
 
-# Private Endpoint for AKS API Server
-#resource "azurerm_private_endpoint" "aks_endpoint" {
-#  name                = "aks-private-endpoint"
-#  location            = azurerm_resource_group.main.location
-#  resource_group_name = azurerm_resource_group.main.name
-#  subnet_id           = azurerm_subnet.main.id
+
+resource "azurerm_private_endpoint" "aks_endpoint" {
+  name                = "aks-private-endpoint"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  subnet_id           = azurerm_subnet.main.id
 
   private_service_connection {
     name                           = "aks-connection"
