@@ -18,3 +18,15 @@ variable "resource_group_name" {
   type        = string
   default = "privateAksRg"
 }
+variable "aks_id" {
+  description = "The ID of the AKS Cluster"
+  type        = string
+}
+variable "acr_name" {
+  description = "The name of the ACR"
+  type        = string
+}
+variable "acr_id" {
+  description = "The ID of the ACR"
+  type        = string
+}

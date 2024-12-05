@@ -34,6 +34,9 @@ module "aks" {
 }
 
 module "dns" {
-  source = "./modules/dns"
+  source   = "./modules/dns"
   location = var.location
+  aks_id   = module.aks.aks_id
+  acr_id   = module.acr.acr_id
+  acr_name   = module.acr.acr_name
 }

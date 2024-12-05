@@ -41,7 +41,7 @@ resource "azurerm_private_endpoint" "aks_endpoint" {
 
   private_service_connection {
     name                           = "aks-connection"
-    private_connection_resource_id = module.aks.aks_id
+    private_connection_resource_id = var.aks_id
     subresource_names              = ["management"]
     is_manual_connection           = false
   }
@@ -56,7 +56,7 @@ resource "azurerm_private_endpoint" "acr_endpoint" {
 
   private_service_connection {
     name                           = "acr-connection"
-    private_connection_resource_id = module.acr.acr_id
+    private_connection_resource_id = var.acr_id
     subresource_names              = ["registry"]
     is_manual_connection           = false
   }
@@ -73,7 +73,7 @@ resource "azurerm_private_dns_a_record" "aks_dns_record" {
 
 # DNS Record for ACR in Private Zone
 resource "azurerm_private_dns_a_record" "acr_dns_record" {
-  name                = module.acr.name
+  name                = var.acr_name
   zone_name           = azurerm_private_dns_zone.acr_dns.name
   resource_group_name = var.resource_group_name
   ttl                 = 300
