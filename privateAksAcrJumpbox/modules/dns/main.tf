@@ -19,15 +19,15 @@ resource "azurerm_private_dns_zone" "acr_dns" {
 # Virtual Network Link for AKS DNS
 resource "azurerm_private_dns_zone_virtual_network_link" "aks_vnet_link" {
   name                  = "aks-vnet-link"
-  resource_group_name   = azurerm_resource_group.main.name
+  resource_group_name   = var.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.aks_dns.name
-  virtual_network_id    = azurerm_virtual_network.main.id
+  virtual_network_id    = var.aks_vnet_id
 }
 
 # Virtual Network Link for ACR DNS
 resource "azurerm_private_dns_zone_virtual_network_link" "acr_vnet_link" {
   name                  = "acr-vnet-link"
-  resource_group_name   = azurerm_resource_group.main.name
+  resource_group_name   = var.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.acr_dns.name
   virtual_network_id    = var.aks_vnet_id
 }
@@ -36,16 +36,16 @@ resource "azurerm_private_dns_zone_virtual_network_link" "acr_vnet_link" {
 resource "azurerm_private_dns_a_record" "aks_dns_record" {
   name                = "aks-api"
   zone_name           = azurerm_private_dns_zone.aks_dns.name
-  resource_group_name = azurerm_resource_group.main.name
+  resource_group_name = var.resource_group_name
   ttl                 = 300
   records             = [azurerm_private_dns_zone_virtual_network_link.aks_vnet_link.private_service_connection[0].private_ip_address]
 }
 
 # DNS Record for ACR in Private Zone
 resource "azurerm_private_dns_a_record" "acr_dns_record" {
-  name                = azurerm_container_registry.main.name
+  name                = module.acr.name
   zone_name           = azurerm_private_dns_zone.acr_dns.name
-  resource_group_name = azurerm_resource_group.main.name
+  resource_group_name = var.resource_group_name
   ttl                 = 300
-  records             = [azurerm_private_endpoint.acr_endpoint.private_service_connection[0].private_ip_address]
+  records             = [azurerm_private_dns_zone_virtual_network_link.acr_vnet_link.private_service_connection[0].private_ip_address]
 }

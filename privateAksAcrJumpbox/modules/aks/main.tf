@@ -26,12 +26,12 @@ resource "azurerm_kubernetes_cluster" "aks" {
     load_balancer_sku = "standard"
   }
   web_app_routing {
-    dns_zone_ids = [azurerm_private_dns_zone.aks_dns.id]
+    dns_zone_ids = [module.dns.aks_dns_id]
   }
 }
 
 resource "azurerm_role_assignment" "acr_pull" {
-  scope                = azurerm_container_registry.main.id
+  scope                = module.acr.acr_id
   role_definition_name = "AcrPull"
-  principal_id         = azurerm_kubernetes_cluster.main.identity[0].principal_id
+  principal_id         = azurerm_kubernetes_cluster.aks.identity[0].principal_id
 }
