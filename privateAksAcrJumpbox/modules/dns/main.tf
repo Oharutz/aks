@@ -39,7 +39,7 @@ resource "azurerm_private_dns_a_record" "aks_dns_record" {
   resource_group_name = azurerm_resource_group.main.name
   ttl                 = 300
   records             = [data.azurerm_private_endpoint.kube_apiserver.private_service_connection[0].private_ip_address]
-#}
+}
 
 # DNS Record for ACR in Private Zone
 resource "azurerm_private_dns_a_record" "acr_dns_record" {

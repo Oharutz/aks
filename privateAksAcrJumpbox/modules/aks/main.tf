@@ -35,11 +35,3 @@ resource "azurerm_role_assignment" "acr_pull" {
   role_definition_name = "AcrPull"
   principal_id         = azurerm_kubernetes_cluster.main.identity[0].principal_id
 }
-
-output "kube_config_raw" {
-  value = azurerm_kubernetes_cluster.aks.kube_config_raw
-}
-
-output "aks_id" {
-  value = azurerm_kubernetes_cluster.aks.id
-}
