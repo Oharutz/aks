@@ -10,7 +10,7 @@ trigger:
 - main
 
 pool:
-  name: 'azUbuntuAgentPool'
+  name: 'privateAksAgentPool'
 
 jobs:
   - job: ConditionalTrigger
