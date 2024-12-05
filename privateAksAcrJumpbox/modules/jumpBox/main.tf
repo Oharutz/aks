@@ -10,10 +10,16 @@ resource "azurerm_virtual_machine" "jumpbox" {
   storage_image_reference {
     publisher = "Canonical"
     offer     = "UbuntuServer"
-    sku       = "18.04-LTS"
+    sku       = "22.04-LTS"
     version   = "latest"
   }
-
+  os_profile_linux_config {
+  disable_password_authentication = false
+  ssh_keys {
+    path     = "/home/azureuser/.ssh/authorized_keys"
+    key_data = file("~/.ssh/id_rsa.pub")
+  }
+  
   os_profile {
     computer_name  = "jumpbox"
     admin_username = "azureuser"
@@ -30,4 +36,8 @@ resource "azurerm_network_interface" "jumpbox_nic" {
     subnet_id                     = azurerm_subnet.main.id
     private_ip_address_allocation = "Dynamic"
   }
+}
+
+output "jumpbox_public_ip" {
+  value = azurerm_public_ip.jumpbox.ip_address
 }

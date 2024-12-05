@@ -2,18 +2,23 @@ provider "azurerm" {
   features {}
 }
 
-module "networks" {
-  source = "./modules/networks"
-  prefix = var.prefix
+# Create a resource group
+resource "azurerm_resource_group" "main" {
+  name     = var.resource_group_name
   location = var.location
+}
+
+module "acr" {
+  source = "./modules/acr"
+  prefix = var.prefix
 }
 
 module "aks" {
   source = "./modules/aks"
   prefix = var.prefix
   location = var.location
-  vnet_id = module.networks.vnet_id
-  subnet_id = module.networks.aks_subnet_id
+  aks_vnet_id = var.aks_vnet_id
+  aks_subnet_id = var.aks_subnet_id
 }
 
 module "dns" {

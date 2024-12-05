@@ -10,8 +10,8 @@ variable "location" {
   default     = "westus"
 }
 
-variable "vmss_vnet_name" {
+variable "aks_subnet_id" {
   type        = string
-  description = "The name of the VNet containing the VMSS."
-  default     = "AzDevopsvNet"
+  description = "The SUBNET ID For the AKS Cluster"
+  default     = "/subscriptions/54da8c11-3fc8-4363-ac36-2ded76e48576/resourceGroups/networkingRg/providers/Microsoft.Network/virtualNetworks/demoEnvSubnet"
 }

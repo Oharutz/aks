@@ -32,7 +32,7 @@ jobs:
       inputs:
         provider: 'azurerm'
         command: 'init'
-        workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksWithACR'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksAcrJumpbox'
         backendServiceArm: 'Azure ARM'
         backendAzureRmResourceGroupName: 'basicAksRg'
         backendAzureRmStorageAccountName: 'tfstateaccount1296'
@@ -45,7 +45,7 @@ jobs:
       inputs:
         provider: 'azurerm'
         command: 'validate'
-        workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksWithACR'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksAcrJumpbox'
 
 
     # Step 3: Plan Terraform
@@ -54,7 +54,7 @@ jobs:
         provider: 'azurerm'
         command: 'plan'
         environmentServiceNameAzureRM: 'Azure ARM'
-        workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksWithACR'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksAcrJumpbox'
 
     # Temporary: Check files in current directory
     - script: ls -la
@@ -66,12 +66,17 @@ jobs:
       inputs:
         provider: 'azurerm'
         command: 'apply'
-        workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksWithACR'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksAcrJumpbox'
         commandOptions: '-auto-approve'
         environmentServiceNameAzureRM: 'Azure ARM'
 
     # Step 5: Output kubeconfig (optional)
     - script: |
-        echo "Kubeconfig:"
-        terraform output kube_config
-      displayName: 'Output Kubeconfig'
+        echo "Copying kubeconfig to jump box"
+        echo "$(terraform output -raw kube_config_raw)" > kubeconfig
+        mkdir -p ~/.kube
+        mv kubeconfig ~/.kube/config
+
+        echo "Deploying manifests to private AKS cluster"
+        kubectl apply -f deployment.yaml
+      displayName: "Save kubeconfig"

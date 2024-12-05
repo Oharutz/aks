@@ -1,0 +1,28 @@
+trigger:
+  branches:
+    include:
+      - main  # Specify the branch or branches to monitor
+  paths:
+    include:
+      - privateAksAcrJumpbox/nextJsApp  # Include specific paths
+  
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  imageName: 'nextjsbasicapp'
+
+steps:
+  - script: |
+      az acr login --name myprivateacr
+    displayName: 'Login to Private ACR'
+
+  - task: Docker@2
+    inputs:
+      containerRegistry: 'myprivateacr.azurecr.io'
+      repository: '$(imageName)'
+      command: 'buildAndPush'
+      Dockerfile: '**/Dockerfile'
+      tags: |
+        latest

@@ -29,7 +29,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "acr_vnet_link" {
   name                  = "acr-vnet-link"
   resource_group_name   = azurerm_resource_group.main.name
   private_dns_zone_name = azurerm_private_dns_zone.acr_dns.name
-  virtual_network_id    = azurerm_virtual_network.main.id
+  virtual_network_id    = var.aks_vnet_id
 }
 
 # DNS Record for AKS in Private Zone
