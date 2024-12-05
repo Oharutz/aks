@@ -28,7 +28,9 @@ module "aks" {
   prefix = var.prefix
   location = azurerm_resource_group.main.location
   aks_subnet_id = var.aks_subnet_id
+  acr_id              = module.acr.acr_id
   resource_group_name = azurerm_resource_group.main.name
+  
 }
 
 module "dns" {
