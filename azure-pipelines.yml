@@ -63,6 +63,7 @@ jobs:
 
     #Plan Terraform
     - task: TerraformTaskV4@4
+      displayName: 'Terraform Plan'
       inputs:
         provider: 'azurerm'
         command: 'plan'
@@ -83,6 +84,15 @@ jobs:
         commandOptions: '-auto-approve'
         environmentServiceNameAzureRM: 'Azure ARM'
 
+    # Copy private key to the agent
+    - task: AzureKeyVault@2
+      displayName: Copy private key to the agent
+      inputs:
+        azureSubscription: 'Azure ARM'
+        KeyVaultName: 'aksKeyVault1296'
+        SecretsFilter: 'ssh-private Key'
+        RunAsPreJob: true
+
     # Save kubeconfig and transfer to jumpbox
     - script: |
         echo "Copying kubeconfig to jump box"
@@ -91,11 +101,3 @@ jobs:
         ssh -o StrictHostKeyChecking=no appusr@$(JUMPBOXIP) 'chmod 600 ~/.kube/config && mkdir -p ~/.kube'
       displayName: "Save kubeconfig and Transfer to Jumpbox"
 
-    # Deploy Application
-    - script: |
-        ssh -o StrictHostKeyChecking=no appusr@$(JUMPBOXIP) << EOF
-          # Apply application manifests
-          kubectl apply -f /path/to/nextjs-deployment.yml
-          kubectl apply -f /path/to/nextjs-ingress.yml
-        EOF
-      displayName: Deploy Application
