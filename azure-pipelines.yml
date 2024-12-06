@@ -83,7 +83,7 @@ jobs:
 
     # Copy private key to the agent
     - task: AzureKeyVault@2
-      displayName: Copy private key to the agent
+      displayName: Fetch private key from Key Vault
       inputs:
         azureSubscription: 'Azure ARM'
         KeyVaultName: 'aksKeyVault1296'
@@ -92,10 +92,11 @@ jobs:
 
     # Configure SSH Key
     - script: |
+        mkdir -p ~/.ssh
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-        mkdir -p ~/.ssh
-        echo "SSH key setup complete"
+        ssh-keyscan -H $(JUMPBOXIP) >> ~/.ssh/known_hosts
+        echo "SSH key and known_hosts configured."
       displayName: Configure SSH Key for Agent
       env:
         SSH_PRIVATE_KEY: $(ssh-private-key)
