@@ -44,6 +44,11 @@ jobs:
         provider: 'azurerm'
         command: 'init'
         workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksAcrJumpbox'
+        backendServiceArm: 'Azure ARM'
+        backendAzureRmResourceGroupName: 'basicAksRg'
+        backendAzureRmStorageAccountName: 'tfstateaccount1296'
+        backendAzureRmContainerName: 'tfstate'
+        backendAzureRmKey: 'terraform.tfstate'
 
     # Apply Terraform
     - task: TerraformTaskV4@4
