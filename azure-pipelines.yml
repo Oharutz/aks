@@ -58,6 +58,7 @@ jobs:
         command: 'apply'
         workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksAcrJumpbox'
         commandOptions: '-auto-approve'
+        environmentServiceNameAzureRM: 'Azure ARM'
 
     # Deploy NGINX Ingress Controller via Jumpbox
     - script: |
