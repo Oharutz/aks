@@ -16,12 +16,14 @@ jobs:
   - job: ConditionalTrigger
     condition: ne(variables['commitMessage'], '[Skip]')
     steps:
-    #Print Vars
+    # Print Vars
     - script: |
         echo "prefix=$(prefix)"
         echo "location=$(location)"
-        echo "location=$(aks_subnet_id)"
-        echo "location=$(aks_vnet_id)"
+        echo "aks_subnet_id=$(aks_subnet_id)"
+        echo "aks_vnet_id=$(aks_vnet_id)"
+      displayName: "Print Variables"
+
     # Install Terraform and kubectl
     - script: |
         # Update package list and install prerequisites
@@ -39,7 +41,7 @@ jobs:
         kubectl version --client
       displayName: Install Terraform and kubectl
 
-    #Initialize Terraform
+    # Initialize Terraform
     - task: TerraformTaskV4@4
       displayName: 'Terraform Init'
       inputs:
@@ -52,7 +54,7 @@ jobs:
         backendAzureRmContainerName: 'tfstate'
         backendAzureRmKey: 'terraform.tfstate'
 
-    #Validate Terraform
+    # Validate Terraform
     - task: TerraformTaskV4@4
       displayName: 'Terraform Validate'
       inputs:
@@ -60,8 +62,7 @@ jobs:
         command: 'validate'
         workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksAcrJumpbox'
 
-
-    #Plan Terraform
+    # Plan Terraform
     - task: TerraformTaskV4@4
       displayName: 'Terraform Plan'
       inputs:
@@ -70,11 +71,7 @@ jobs:
         environmentServiceNameAzureRM: 'Azure ARM'
         workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksAcrJumpbox'
 
-    #Check files in current directory
-    - script: ls -la
-      displayName: Show Current Files
-      
-    #Apply Terraform
+    # Apply Terraform
     - task: TerraformTaskV4@4
       displayName: 'Terraform Apply'
       inputs:
@@ -93,11 +90,30 @@ jobs:
         SecretsFilter: 'ssh-private-key'
         RunAsPreJob: true
 
+    # Configure SSH Key
+    - script: |
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        mkdir -p ~/.ssh
+        echo "SSH key setup complete"
+      displayName: Configure SSH Key for Agent
+      env:
+        SSH_PRIVATE_KEY: $(ssh-private-key)
+
     # Save kubeconfig and transfer to jumpbox
     - script: |
-        echo "Copying kubeconfig to jump box"
+        echo "Copying kubeconfig to jumpbox"
         echo "$(terraform output -raw kube_config_raw)" > kubeconfig
         scp -o StrictHostKeyChecking=no kubeconfig appusr@$(JUMPBOXIP):~/.kube/config
         ssh -o StrictHostKeyChecking=no appusr@$(JUMPBOXIP) 'chmod 600 ~/.kube/config && mkdir -p ~/.kube'
       displayName: "Save kubeconfig and Transfer to Jumpbox"
 
+    # Deploy NGINX Ingress Controller
+    - script: |
+        ssh -o StrictHostKeyChecking=no appusr@$(JUMPBOXIP) << EOF
+          helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+          helm repo update
+          helm install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-basic --create-namespace \
+            --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-internal"="true"
+        EOF
+      displayName: Deploy NGINX Ingress Controller
