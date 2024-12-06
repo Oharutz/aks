@@ -26,16 +26,12 @@ jobs:
 
     # Install Terraform and kubectl
     - script: |
-        # Update package list and install prerequisites
-        sudo apt-get update && sudo apt-get install -y unzip curl apt-transport-https
-
-        # Install Terraform
+        sudo apt-get update && sudo apt-get install -y unzip curl apt-transport-https sshpass
         curl -O https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip
         unzip terraform_1.5.0_linux_amd64.zip
         sudo mv terraform /usr/local/bin/
         terraform version
 
-        # Install kubectl
         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
         sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
         kubectl version --client
@@ -48,28 +44,6 @@ jobs:
         provider: 'azurerm'
         command: 'init'
         workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksAcrJumpbox'
-        backendServiceArm: 'Azure ARM'
-        backendAzureRmResourceGroupName: 'basicAksRg'
-        backendAzureRmStorageAccountName: 'tfstateaccount1296'
-        backendAzureRmContainerName: 'tfstate'
-        backendAzureRmKey: 'terraform.tfstate'
-
-    # Validate Terraform
-    - task: TerraformTaskV4@4
-      displayName: 'Terraform Validate'
-      inputs:
-        provider: 'azurerm'
-        command: 'validate'
-        workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksAcrJumpbox'
-
-    # Plan Terraform
-    - task: TerraformTaskV4@4
-      displayName: 'Terraform Plan'
-      inputs:
-        provider: 'azurerm'
-        command: 'plan'
-        environmentServiceNameAzureRM: 'Azure ARM'
-        workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksAcrJumpbox'
 
     # Apply Terraform
     - task: TerraformTaskV4@4
@@ -79,42 +53,33 @@ jobs:
         command: 'apply'
         workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksAcrJumpbox'
         commandOptions: '-auto-approve'
-        environmentServiceNameAzureRM: 'Azure ARM'
 
-    # Copy private key to the agent
-    - task: AzureKeyVault@2
-      displayName: Fetch private key from Key Vault
-      inputs:
-        azureSubscription: 'Azure ARM'
-        KeyVaultName: 'aksKeyVault1296'
-        SecretsFilter: 'ssh-private-key'
-        RunAsPreJob: true
-
-    # Configure SSH Key
+    # Deploy NGINX Ingress Controller via Jumpbox
     - script: |
-        mkdir -p ~/.ssh
-        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H $(JUMPBOXIP) >> ~/.ssh/known_hosts
-        echo "SSH key and known_hosts configured."
-      displayName: Configure SSH Key for Agent
-      env:
-        SSH_PRIVATE_KEY: $(ssh-private-key)
+        sshpass -p "$JUMPBOX_PASSWORD" ssh -o StrictHostKeyChecking=no appusr@$(JUMPBOXIP) << EOF
+          # Authenticate with Azure using Managed Identity
+          az login --identity
 
-    # Save kubeconfig and transfer to jumpbox
-    - script: |
-        echo "Copying kubeconfig to jumpbox"
-        echo "$(terraform output -raw kube_config_raw)" > kubeconfig
-        scp -o StrictHostKeyChecking=no kubeconfig appusr@$(JUMPBOXIP):~/.kube/config
-        ssh -o StrictHostKeyChecking=no appusr@$(JUMPBOXIP) 'chmod 600 ~/.kube/config && mkdir -p ~/.kube'
-      displayName: "Save kubeconfig and Transfer to Jumpbox"
+          # Dynamically fetch AKS resource group and cluster name from Terraform outputs
+          AKS_RESOURCE_GROUP=$(terraform output -raw resource_group_name)
+          AKS_NAME=$(terraform output -raw aks_name)
 
-    # Deploy NGINX Ingress Controller
-    - script: |
-        ssh -o StrictHostKeyChecking=no appusr@$(JUMPBOXIP) << EOF
+          # Fetch AKS credentials
+          az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_NAME --overwrite-existing
+
+          # Add the Helm repository
           helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
           helm repo update
-          helm install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-basic --create-namespace \
-            --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-internal"="true"
+
+          # Deploy the private NGINX ingress controller
+          helm install ingress-nginx ingress-nginx/ingress-nginx \
+            --namespace ingress-basic --create-namespace \
+            --set controller.service.annotations.\"service.beta.kubernetes.io/azure-load-balancer-internal\"=\"true\"
+
+          # Validate the deployment
+          kubectl get pods -n ingress-basic
+          kubectl get svc -n ingress-basic
         EOF
-      displayName: Deploy NGINX Ingress Controller
+      displayName: "Deploy NGINX Ingress Controller Using Bastion"
+      env:
+        JUMPBOX_PASSWORD: $(jumpbox-password)
