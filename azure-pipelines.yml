@@ -90,7 +90,7 @@ jobs:
       inputs:
         azureSubscription: 'Azure ARM'
         KeyVaultName: 'aksKeyVault1296'
-        SecretsFilter: 'ssh-private Key'
+        SecretsFilter: 'ssh-private-key'
         RunAsPreJob: true
 
     # Save kubeconfig and transfer to jumpbox
