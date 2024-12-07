@@ -91,7 +91,8 @@ jobs:
         az login --identity
 
         # Install SSH Extension
-        az extension add -n ssh
+        az extension add -n ssh --yes
+        az extension add --name bastion --yes
         
         # Dynamically fetch AKS resource group and cluster name from Terraform outputs
         echo "Fetching AKS resource group and cluster name from Terraform outputs..."
