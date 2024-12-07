@@ -6,8 +6,7 @@ echo "Authenticating with Azure using Managed Identity..."
 az login --identity
 
 echo "Fetching AKS credentials for the cluster..."
-az aks get-credentials --resource-group $1 --name $2 --overwrite-existing
-
+az aks get-credentials --admin --name $2 --resource-group $1
 echo "Adding Helm repository..."
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update
