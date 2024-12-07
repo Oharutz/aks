@@ -115,5 +115,6 @@ jobs:
             } &> /tmp/nginx_deploy.log
           "
       displayName: "Deploy NGINX Ingress Controller Using Bastion and Password"
+      workingDirectory: $(System.DefaultWorkingDirectory)/privateAksAcrJumpbox
       env:
         JUMPBOX_PASSWORD: $(jumpbox-password)
