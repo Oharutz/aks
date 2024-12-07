@@ -87,7 +87,7 @@ jobs:
 
         # Copy Key to Working Directory
         echo "$(id_rsa.secureFilePath)"
-        chmod 600 $(id_rsa.secureFilePath)
+        chmod 777 $(id_rsa.secureFilePath)
 
         # Authenticate to Azure
         echo "Logging into Azure with Managed Identity..."
