@@ -99,6 +99,6 @@ jobs:
 
         # Execute the uploaded script on the Jumpbox
         echo "Executing deployment script on Jumpbox..."
-        ssh -o StrictHostKeyChecking=no -i $(id_rsa.secureFilePath) appusr@$(JUMPBOXIP) "bash ~/deploy_nginx.sh $RESOURCE_GROUP_NAME $AKS_NAME"
+        ssh -o StrictHostKeyChecking=no -i $(id_rsa.secureFilePath) appusr@$(JUMPBOXIP) "bash ~/deploy_nginx.sh $(terraform output -raw resource_group_name) $(terraform output -raw aks_name)"
     displayName: "Deploy NGINX Using Bastion"
   
