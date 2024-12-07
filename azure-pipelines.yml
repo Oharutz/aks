@@ -76,12 +76,12 @@ jobs:
     # Configure SSH Key
     - script: |
         mkdir -p ~/.ssh
-        echo "$(SSH_PRIVATE_KEY)" > id_rsa
+        sudo -s echo "$(SSH_PRIVATE_KEY)" > id_rsa
         chmod 600 id_rsa
         ssh-keyscan -H $(JUMPBOXIP) >> ~/.ssh/known_hosts
 
         # Debug: Verify the private key is correctly stored
-        ls -la ~/.ssh
+        ls -la
         cat ~/.ssh/known_hosts
       displayName: Configure SSH Key on Agent
       env:
