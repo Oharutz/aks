@@ -90,6 +90,9 @@ jobs:
         echo "Logging into Azure with Managed Identity..."
         az login --identity
 
+        # Install SSH Extension
+        az extension add -n ssh
+        
         # Dynamically fetch AKS resource group and cluster name from Terraform outputs
         echo "Fetching AKS resource group and cluster name from Terraform outputs..."
         AKS_RESOURCE_GROUP=$(terraform output -raw resource_group_name)
