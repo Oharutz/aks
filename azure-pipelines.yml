@@ -65,6 +65,7 @@ jobs:
         provider: 'azurerm'
         command: 'output'
         environmentServiceNameAzureRM: 'Azure ARM'
+        workingDirectory: $(System.DefaultWorkingDirectory)/privateAksAcrJumpbox
     # Deploy NGINX Ingress Controller via Jumpbox
     - script: |
         # Enable verbose logging
