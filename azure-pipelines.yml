@@ -71,7 +71,7 @@ jobs:
 
         # Dynamically fetch AKS resource group and cluster name from Terraform outputs
         echo "Fetching AKS resource group and cluster name from Terraform outputs..."
-        AKS_RESOURCE_GROUP=$(terraform output -raw aks_resource_group)
+        AKS_RESOURCE_GROUP=$(terraform output -raw resource_group_name)
         AKS_NAME=$(terraform output -raw aks_name)
         echo "AKS Resource Group: $AKS_RESOURCE_GROUP"
         echo "AKS Name: $AKS_NAME"
