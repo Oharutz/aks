@@ -75,7 +75,7 @@ jobs:
         RunAsPreJob: true
     - script: |
         mkdir -p ~/.ssh
-        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+        echo "($SSH_PRIVATE_KEY)" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H $(JUMPBOXIP) >> ~/.ssh/known_hosts
       displayName: Configure SSH for Agent
