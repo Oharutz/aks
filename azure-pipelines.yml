@@ -74,6 +74,11 @@ jobs:
 #        SecretsFilter: 'ssh-private-key'
 #        RunAsPreJob: true
     # Configure SSH Key
+    - task: DownloadSecureFile@1
+      inputs:
+        secureFile: 'id_rsa'
+        retryCount: '3'
+      displayName: Download Key from Pipeline to Agent
     - script: |
         mkdir -p ~/.ssh
         sudo -s echo "$(SSH_PRIVATE_KEY)" > id_rsa
