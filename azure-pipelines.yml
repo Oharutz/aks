@@ -62,30 +62,40 @@ jobs:
 
     # Deploy NGINX Ingress Controller via Jumpbox
     - script: |
-        sshpass -p "$JUMPBOX_PASSWORD" ssh -o StrictHostKeyChecking=no appusr@$(JUMPBOXIP) << EOF
-          # Authenticate with Azure using Managed Identity
-          az login --identity
+        # Enable verbose logging
+        set -x
 
-          # Dynamically fetch AKS resource group and cluster name from Terraform outputs
-          AKS_RESOURCE_GROUP=$(terraform output -raw resource_group_name)
-          AKS_NAME=$(terraform output -raw aks_name)
+        # Authenticate to Azure
+        az login --identity
 
-          # Fetch AKS credentials
-          az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_NAME --overwrite-existing
+        # Dynamically fetch AKS resource group and cluster name from Terraform outputs
+        AKS_RESOURCE_GROUP=$(terraform output -raw aks_resource_group)
+        AKS_NAME=$(terraform output -raw aks_name)
 
-          # Add the Helm repository
-          helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-          helm repo update
+        # Connect via Azure Bastion and execute commands with password authentication
+        az network bastion ssh --name $(BASTIONNAME) \
+          --resource-group $(BASTIONRESOURCEGROUP) \
+          --target-resource-id "$BASTIONID" \
+          --auth-type password \
+          --username appusr \
+          --password "$JUMPBOX_PASSWORD" \
+          --command "
+            # Fetch AKS credentials
+            az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_NAME --overwrite-existing
 
-          # Deploy the private NGINX ingress controller
-          helm install ingress-nginx ingress-nginx/ingress-nginx \
-            --namespace ingress-basic --create-namespace \
-            --set controller.service.annotations.\"service.beta.kubernetes.io/azure-load-balancer-internal\"=\"true\"
+            # Add the Helm repository
+            helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+            helm repo update
 
-          # Validate the deployment
-          kubectl get pods -n ingress-basic
-          kubectl get svc -n ingress-basic
-        EOF
-      displayName: "Deploy NGINX Ingress Controller Using Bastion"
+            # Deploy the private NGINX ingress controller
+            helm install ingress-nginx ingress-nginx/ingress-nginx \
+              --namespace ingress-basic --create-namespace \
+              --set controller.service.annotations.\"service.beta.kubernetes.io/azure-load-balancer-internal\"=\"true\"
+
+            # Validate the deployment
+            kubectl get pods -n ingress-basic
+            kubectl get svc -n ingress-basic
+          "
+      displayName: "Deploy NGINX Ingress Controller Using Bastion and Password"
       env:
         JUMPBOX_PASSWORD: $(jumpbox-password)
