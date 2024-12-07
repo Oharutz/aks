@@ -90,6 +90,8 @@ jobs:
         az extension add -n ssh --yes
         az extension add --name bastion --yes
 
+        chmod 600 $(id_rsa.secureFilePath)
+        
         # Upload the uploaded deployment script to the Jumpbox
         echo "Uploading deployment script to Jumpbox..."
         scp -o StrictHostKeyChecking=no -i $(id_rsa.secureFilePath) $(System.DefaultWorkingDirectory)/scripts/deploy_nginx.sh appusr@$(JUMPBOXIP):~/deploy_nginx.sh
