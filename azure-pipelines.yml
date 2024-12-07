@@ -59,7 +59,12 @@ jobs:
         workingDirectory: '$(System.DefaultWorkingDirectory)/privateAksAcrJumpbox'
         commandOptions: '-auto-approve'
         environmentServiceNameAzureRM: 'Azure ARM'
-
+    - task: TerraformTaskV4@4
+      displayName: 'Terraform Output'
+      inputs:
+        provider: 'azurerm'
+        command: 'output'
+        environmentServiceNameAzureRM: 'Azure ARM'
     # Deploy NGINX Ingress Controller via Jumpbox
     - script: |
         # Enable verbose logging
