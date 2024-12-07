@@ -112,7 +112,7 @@ jobs:
           --auth-type ssh-key \
           --username appusr \
           --ssh-key $(id_rsa.secureFilePath) \
-          -- debug  
+          --debug  
             # Fetch AKS credentials
             echo 'Fetching AKS credentials...'
             az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_NAME --overwrite-existing
