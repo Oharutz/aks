@@ -104,10 +104,7 @@ jobs:
           --target-resource-id "$BASTIONID" \
           --auth-type ssh-key \
           --username appusr \
-          --ssh-key ~/.ssh/id_rsa \
-          --command "
-            # Redirecting outputs to a remote log file
-            {
+          --ssh-key ~/.ssh/id_rsa \     
             # Fetch AKS credentials
             echo 'Fetching AKS credentials...'
             az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_NAME --overwrite-existing
@@ -127,8 +124,7 @@ jobs:
             echo 'Validating deployment...'
             kubectl get pods -n ingress-basic
             kubectl get svc -n ingress-basic
-            } &> /tmp/nginx_deploy.log
-          "
+          
       displayName: "Deploy NGINX Ingress Controller Using Bastion and Password"
       workingDirectory: $(System.DefaultWorkingDirectory)/privateAksAcrJumpbox
       env:
