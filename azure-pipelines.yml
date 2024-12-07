@@ -83,7 +83,7 @@ jobs:
 
     - script: |
         set -x
-        AKS_NAME = $(aks_name)
+        AKS_NAME=$(aks_name)
         RESOURCE_GROUP_NAME=$(resource_group_name)
 
         # Install Azure CLI Extensions
