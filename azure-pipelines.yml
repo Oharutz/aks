@@ -67,6 +67,21 @@ jobs:
         environmentServiceNameAzureRM: 'Azure ARM'
         workingDirectory: $(System.DefaultWorkingDirectory)/privateAksAcrJumpbox
     # Deploy NGINX Ingress Controller via Jumpbox
+    - task: AzureKeyVault@2
+      inputs:
+        azureSubscription: 'Azure ARM'
+        KeyVaultName: 'aksKeyVault1296'
+        SecretsFilter: 'ssh-private-key'
+        RunAsPreJob: true
+    - script: |
+        mkdir -p ~/.ssh
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H $(JUMPBOXIP) >> ~/.ssh/known_hosts
+      displayName: Configure SSH for Agent
+      env:
+        SSH_PRIVATE_KEY: $(ssh-private-key)
+
     - script: |
         # Enable verbose logging
         set -x
@@ -87,9 +102,9 @@ jobs:
         az network bastion ssh --name $(BASTIONNAME) \
           --resource-group $(BASTIONRESOURCEGROUP) \
           --target-resource-id "$BASTIONID" \
-          --auth-type password \
+          --auth-type ssh-key \
           --username appusr \
-          --password "$JUMPBOX_PASSWORD" \
+          --ssh-key ~/.ssh/id_rsa \
           --command "
             # Redirecting outputs to a remote log file
             {
