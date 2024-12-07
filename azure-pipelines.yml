@@ -82,62 +82,20 @@ jobs:
       displayName: Download Key from Pipeline to Agent
 
     - script: |
-        # Enable verbose logging
         set -x
 
-        # Copy Key to Working Directory
-        echo "$(id_rsa.secureFilePath)"
-        chmod 600 $(id_rsa.secureFilePath)
-
-        # Authenticate to Azure
-        echo "Logging into Azure with Managed Identity..."
-        az login --identity
-
-        # Install SSH Extension
+        # Install Azure CLI Extensions
         az extension add -n ssh --yes
         az extension add --name bastion --yes
-        
-        # Dynamically fetch AKS resource group and cluster name from Terraform outputs
-        echo "Fetching AKS resource group and cluster name from Terraform outputs..."
-        AKS_RESOURCE_GROUP=$(terraform output -raw resource_group_name)
-        AKS_NAME=$(terraform output -raw aks_name)
-        echo "AKS Resource Group: $AKS_RESOURCE_GROUP"
-        echo "AKS Name: $AKS_NAME"
 
-        # Connect via Azure Bastion and execute commands with password authentication
-        echo "Connecting to jumpbox via Azure Bastion..."
-        az network bastion ssh --name $(BASTIONNAME) \
-          --resource-group $(BASTIONRESOURCEGROUP) \
-          --target-resource-id "$(JUMPBOX_ID)" \
-          --auth-type ssh-key \
-          --username appusr \
-          --ssh-key $(id_rsa.secureFilePath) \
-          --debug  
-          echo "AKS Resource Group: $AKS_RESOURCE_GROUP"
-          echo "AKS Name: $AKS_NAME"
-          echo "AKS Resource Group: $(terraform output -raw resource_group_name)"
-          echo "AKS Name: $(terraform output -raw aks_name)"
-            # Fetch AKS credentials
-            echo 'Fetching AKS credentials...'
-            az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_NAME --overwrite-existing
+        # Upload the uploaded deployment script to the Jumpbox
+        echo "Uploading deployment script to Jumpbox..."
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $(System.DefaultWorkingDirectory)/path/to/deploy_nginx.sh appusr@$(JUMPBOX_IP):~/deploy_nginx.sh
 
-            # Add the Helm repository
-            echo 'Adding Helm repository...'
-            helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-            helm repo update
-
-            # Deploy the private NGINX ingress controller
-            echo 'Deploying NGINX ingress controller...'
-            helm install ingress-nginx ingress-nginx/ingress-nginx \
-              --namespace ingress-basic --create-namespace \
-              --set controller.service.annotations.\"service.beta.kubernetes.io/azure-load-balancer-internal\"=\"true\"
-
-            # Validate the deployment
-            echo 'Validating deployment...'
-            kubectl get pods -n ingress-basic
-            kubectl get svc -n ingress-basic
-          
-      displayName: "Deploy NGINX Ingress Controller Using Bastion and Password"
-      workingDirectory: $(System.DefaultWorkingDirectory)/privateAksAcrJumpbox
-      env:
-        JUMPBOX_PASSWORD: $(jumpbox-password)
+        # Execute the uploaded script on the Jumpbox
+        echo "Executing deployment script on Jumpbox..."
+        ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa appusr@$(JUMPBOX_IP) "bash ~/deploy_nginx.sh $(FetchOutputs.AKS_RESOURCE_GROUP) $(FetchOutputs.AKS_NAME)"
+    displayName: "Deploy NGINX Using Bastion"
+    env:
+      AKS_RESOURCE_GROUP: "$(FetchOutputs.AKS_RESOURCE_GROUP)"
+      AKS_NAME: "$(FetchOutputs.AKS_NAME)"
