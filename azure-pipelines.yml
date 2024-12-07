@@ -85,6 +85,8 @@ jobs:
           --username appusr \
           --password "$JUMPBOX_PASSWORD" \
           --command "
+            # Redirecting outputs to a remote log file
+            {
             # Fetch AKS credentials
             echo 'Fetching AKS credentials...'
             az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_NAME --overwrite-existing
@@ -104,6 +106,7 @@ jobs:
             echo 'Validating deployment...'
             kubectl get pods -n ingress-basic
             kubectl get svc -n ingress-basic
+            } &> /tmp/nginx_deploy.log
           "
       displayName: "Deploy NGINX Ingress Controller Using Bastion and Password"
       env:
