@@ -111,7 +111,8 @@ jobs:
           --target-resource-id "$(JUMPBOX_ID)" \
           --auth-type ssh-key \
           --username appusr \
-          --ssh-key $(id_rsa.secureFilePath) \     
+          --ssh-key $(id_rsa.secureFilePath) \
+          -- debug  
             # Fetch AKS credentials
             echo 'Fetching AKS credentials...'
             az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_NAME --overwrite-existing
