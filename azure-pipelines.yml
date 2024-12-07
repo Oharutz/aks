@@ -79,30 +79,15 @@ jobs:
         secureFile: 'id_rsa'
         retryCount: '3'
       displayName: Download Key from Pipeline to Agent
-    - script: |
-        mkdir -p ~/.ssh
-        sudo -s echo "$(SSH_PRIVATE_KEY)" > id_rsa
-        chmod 600 id_rsa
-        ssh-keyscan -H $(JUMPBOXIP) >> ~/.ssh/known_hosts
-
-        # Debug: Verify the private key is correctly stored
-        ls -la
-        cat ~/.ssh/known_hosts
-      displayName: Configure SSH Key on Agent
-      env:
-        SSH_PRIVATE_KEY: $(ssh_private_key)
 
     - script: |
         # Enable verbose logging
         set -x
 
         # Copy Key to Working Directory
-        echo "$(SSH_PRIVATE_KEY)" > id_rsa
-        chmod 600 id_rsa
+        echo $(id_rsa.secureFilePath)
+        chmod 600 $(id_rsa.secureFilePath)
 
-        # Show all current files after copy
-        ls -la ~/.ssh
-        
         # Authenticate to Azure
         echo "Logging into Azure with Managed Identity..."
         az login --identity
@@ -125,7 +110,7 @@ jobs:
           --target-resource-id "$(JUMPBOX_ID)" \
           --auth-type ssh-key \
           --username appusr \
-          --ssh-key id_rsa \     
+          --ssh-key $(id_rsa.secureFilePath) \     
             # Fetch AKS credentials
             echo 'Fetching AKS credentials...'
             az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_NAME --overwrite-existing
