@@ -66,13 +66,18 @@ jobs:
         set -x
 
         # Authenticate to Azure
+        echo "Logging into Azure with Managed Identity..."
         az login --identity
 
         # Dynamically fetch AKS resource group and cluster name from Terraform outputs
+        echo "Fetching AKS resource group and cluster name from Terraform outputs..."
         AKS_RESOURCE_GROUP=$(terraform output -raw aks_resource_group)
         AKS_NAME=$(terraform output -raw aks_name)
+        echo "AKS Resource Group: $AKS_RESOURCE_GROUP"
+        echo "AKS Name: $AKS_NAME"
 
         # Connect via Azure Bastion and execute commands with password authentication
+        echo "Connecting to jumpbox via Azure Bastion..."
         az network bastion ssh --name $(BASTIONNAME) \
           --resource-group $(BASTIONRESOURCEGROUP) \
           --target-resource-id "$BASTIONID" \
@@ -81,18 +86,22 @@ jobs:
           --password "$JUMPBOX_PASSWORD" \
           --command "
             # Fetch AKS credentials
+            echo 'Fetching AKS credentials...'
             az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_NAME --overwrite-existing
 
             # Add the Helm repository
+            echo 'Adding Helm repository...'
             helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
             helm repo update
 
             # Deploy the private NGINX ingress controller
+            echo 'Deploying NGINX ingress controller...'
             helm install ingress-nginx ingress-nginx/ingress-nginx \
               --namespace ingress-basic --create-namespace \
               --set controller.service.annotations.\"service.beta.kubernetes.io/azure-load-balancer-internal\"=\"true\"
 
             # Validate the deployment
+            echo 'Validating deployment...'
             kubectl get pods -n ingress-basic
             kubectl get svc -n ingress-basic
           "
