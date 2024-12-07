@@ -75,6 +75,7 @@ jobs:
 #        RunAsPreJob: true
     # Configure SSH Key
     - task: DownloadSecureFile@1
+      name: 'id_rsa'
       inputs:
         secureFile: 'id_rsa'
         retryCount: '3'
@@ -85,7 +86,7 @@ jobs:
         set -x
 
         # Copy Key to Working Directory
-        echo $(id_rsa.secureFilePath)
+        echo "$(id_rsa.secureFilePath)"
         chmod 600 $(id_rsa.secureFilePath)
 
         # Authenticate to Azure
