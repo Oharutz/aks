@@ -104,7 +104,7 @@ jobs:
         echo "Connecting to jumpbox via Azure Bastion..."
         az network bastion ssh --name $(BASTIONNAME) \
           --resource-group $(BASTIONRESOURCEGROUP) \
-          --target-resource-id "$BASTIONID" \
+          --target-resource-id "$(BASTIONID)" \
           --auth-type ssh-key \
           --username appusr \
           --ssh-key ~/.ssh/id_rsa \     
