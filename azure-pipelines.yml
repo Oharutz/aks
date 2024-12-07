@@ -5,7 +5,8 @@ variables:
   TF_VAR_aks_subnet_id: '$(aks_subnet_id)'
   TF_VAR_aks_vnet_id: '$(aks_vnet_id)'
   TF_VAR_resource_group_name: '$(resource_group_name)'
-
+  BASTIONID: '$(bastionId)'
+  
 trigger:
 - main
 
