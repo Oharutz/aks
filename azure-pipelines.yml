@@ -90,12 +90,9 @@ jobs:
 
         # Upload the uploaded deployment script to the Jumpbox
         echo "Uploading deployment script to Jumpbox..."
-        scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $(System.DefaultWorkingDirectory)/path/to/deploy_nginx.sh appusr@$(JUMPBOX_IP):~/deploy_nginx.sh
+        scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $(System.DefaultWorkingDirectory)/scripts/deploy_nginx.sh appusr@$(JUMPBOX_IP):~/deploy_nginx.sh
 
         # Execute the uploaded script on the Jumpbox
         echo "Executing deployment script on Jumpbox..."
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa appusr@$(JUMPBOX_IP) "bash ~/deploy_nginx.sh $(FetchOutputs.AKS_RESOURCE_GROUP) $(FetchOutputs.AKS_NAME)"
     displayName: "Deploy NGINX Using Bastion"
-    env:
-      AKS_RESOURCE_GROUP: "$(FetchOutputs.AKS_RESOURCE_GROUP)"
-      AKS_NAME: "$(FetchOutputs.AKS_NAME)"
