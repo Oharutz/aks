@@ -91,6 +91,13 @@ jobs:
         # Enable verbose logging
         set -x
 
+        # Copy Key to Working Directory
+        echo "$(SSH_PRIVATE_KEY)" > id_rsa
+        chmod 600 id_rsa
+
+        # Show all current files after copy
+        ls -la ~/.ssh
+        
         # Authenticate to Azure
         echo "Logging into Azure with Managed Identity..."
         az login --identity
