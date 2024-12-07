@@ -76,8 +76,8 @@ jobs:
     # Configure SSH Key
     - script: |
         mkdir -p ~/.ssh
-        echo "$(SSH_PRIVATE_KEY)" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
+        echo "$(SSH_PRIVATE_KEY)" > id_rsa
+        chmod 600 id_rsa
         ssh-keyscan -H $(JUMPBOXIP) >> ~/.ssh/known_hosts
 
         # Debug: Verify the private key is correctly stored
@@ -113,7 +113,7 @@ jobs:
           --target-resource-id "$(JUMPBOX_ID)" \
           --auth-type ssh-key \
           --username appusr \
-          --ssh-key ~/.ssh/id_rsa \     
+          --ssh-key id_rsa \     
             # Fetch AKS credentials
             echo 'Fetching AKS credentials...'
             az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_NAME --overwrite-existing
