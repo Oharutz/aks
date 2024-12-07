@@ -113,6 +113,10 @@ jobs:
           --username appusr \
           --ssh-key $(id_rsa.secureFilePath) \
           --debug  
+          echo "AKS Resource Group: $AKS_RESOURCE_GROUP"
+          echo "AKS Name: $AKS_NAME"
+          echo "AKS Resource Group: $(terraform output -raw resource_group_name)"
+          echo "AKS Name: $(terraform output -raw aks_name)"
             # Fetch AKS credentials
             echo 'Fetching AKS credentials...'
             az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_NAME --overwrite-existing
